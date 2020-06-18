@@ -9,6 +9,7 @@ var messageArea = document.querySelector('#messageArea');
 var connectingElement = document.querySelector('.connecting');
 
 var stompClient = null;
+var subscription = null;
 var username = null;
 var receiver = null;
 var sessionId = "";
@@ -31,7 +32,6 @@ function connect(event) {
 				.connect(
 						{
 							"user" : username,
-							"Authorization" : "Bearer  eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE1OTI0NjgwNzQsImlzcyI6IkF0b3MiLCJzdWIiOiJKUElOQSIsIm1UIjoick8wQUJYTnlBQ1JsY3k1aFpXNWhMbTFwY21FdVlXMXRZUzV0WVhocGJXOHVUV0Y0YVcxdlZHOXJaVzRBQUFBQUFBQUFBUUlBQWt3QUQyMWhlR2x0YjBOdmJtNWxZM1J2Y25RQUpVeGpiMjB2YVdKdEwyMWhlR2x0Ynk5dmMyeGpMMDFoZUdsdGIwTnZibTVsWTNSdmNqdE1BQXR5WlhOdmRYSmpaVk5sZEhRQUVreHFZWFpoTDJ4aGJtY3ZVM1J5YVc1bk8zaHdjM0lBSTJOdmJTNXBZbTB1YldGNGFXMXZMbTl6YkdNdVRXRjRhVzF2UTI5dWJtVmpkRzl5QUFBQUFBQUFBQUVDQUFaYUFBVmtaV0oxWjBrQUVHeGhjM1JTWlhOd2IyNXpaVU52WkdWYUFBVjJZV3hwWkV3QUIyTnZiMnRwWlhOMEFCQk1hbUYyWVM5MWRHbHNMMHhwYzNRN1RBQUthSFIwY0UxbGRHaHZaSEVBZmdBQ1RBQUhiM0IwYVc5dWMzUUFIVXhqYjIwdmFXSnRMMjFoZUdsdGJ5OXZjMnhqTDA5d2RHbHZibk03ZUhBQkFBQUJrQUZ6Y2dBbWFtRjJZUzUxZEdsc0xrTnZiR3hsWTNScGIyNXpKRlZ1Ylc5a2FXWnBZV0pzWlV4cGMzVDhEeVV4dGV5T0VBSUFBVXdBQkd4cGMzUnhBSDRBQlhoeUFDeHFZWFpoTG5WMGFXd3VRMjlzYkdWamRHbHZibk1rVlc1dGIyUnBabWxoWW14bFEyOXNiR1ZqZEdsdmJobENBSURMWHZjZUFnQUJUQUFCWTNRQUZreHFZWFpoTDNWMGFXd3ZRMjlzYkdWamRHbHZianQ0Y0hOeUFCTnFZWFpoTG5WMGFXd3VRWEp5WVhsTWFYTjBlSUhTSFpuSFlaMERBQUZKQUFSemFYcGxlSEFBQUFBQmR3UUFBQUFCZEFCQ1NsTkZVMU5KVDA1SlJEMHdNREF3Y0dKUFF6bEphVTQ1UVhkblRYUktSMTlYT1hsVldISTZNV1J3ZGpaaVlUQjFPeUJRWVhSb1BTODdJRWgwZEhCUGJteDVlSEVBZmdBTmRBQURSMFZVYzNJQUcyTnZiUzVwWW0wdWJXRjRhVzF2TG05emJHTXVUM0IwYVc5dWN3QUFBQUFBQUFBQkFnQU5XZ0FFYkdWaGJsb0FBbTEwV2dBRGMzTnNUQUFLWVhCcFEyOXVkR1Y0ZEhFQWZnQUNUQUFLWVhCd1EyOXVkR1Y0ZEhFQWZnQUNUQUFHWVhCd1ZWSkpjUUIrQUFKTUFBaGhkWFJvVFc5a1pYRUFmZ0FDVEFBRWFHOXpkSEVBZmdBQ1RBQUljR0Z6YzNkdmNtUnhBSDRBQWt3QUJIQnZjblIwQUJOTWFtRjJZUzlzWVc1bkwwbHVkR1ZuWlhJN1RBQUpjSFZpYkdsalZWSkpjUUIrQUFKTUFBcDBaVzVoYm5SamIyUmxjUUIrQUFKTUFBUjFjMlZ5Y1FCK0FBSjRjQUVBQUhRQUJHOXpiR04wQUFadFlYaHBiVzkwQUR0b2RIUndPaTh2YzJOa2JIZGhjekF3TURFdWMzTmpZeTVoWlM1aFpXNWhMbVZ6T2prd09EQXZiV0Y0YVcxdkwyOXpiR00vSm14bFlXNDlNWFFBQjIxaGVHRjFkR2gwQUJ0elkyUnNkMkZ6TURBd01TNXpjMk5qTG1GbExtRmxibUV1WlhOMEFBbEJaVzVoTVRJek5EVnpjZ0FSYW1GMllTNXNZVzVuTGtsdWRHVm5aWElTNHFDazk0R0hPQUlBQVVrQUJYWmhiSFZsZUhJQUVHcGhkbUV1YkdGdVp5NU9kVzFpWlhLR3JKVWRDNVRnaXdJQUFIaHdBQUFqZUhRQU0yaDBkSEE2THk5elkyUnNkMkZ6TURBd01TNXpjMk5qTG1GbExtRmxibUV1WlhNNk9UQTRNQzl0WVhocGJXOHZiM05zWTNRQUFqQXdkQUFGU2xCSlRrRnciLCJleHAiOjE1OTMzMzIwNzR9.JoTzonM3H-y1OHvHrZI_P7bkdkEdaT9XVUH8u1gr1-rQCo0xbH557qQDytTWrkl0bN9cElYdIafhmhsZjwRx0Q"
 						}, onConnected, onError);
 	}
 	event.preventDefault();
@@ -47,13 +47,23 @@ function onConnected() {
 	// console.log("Your current session is: " + url);
 	// sessionId = url;
 
-	stompClient.subscribe('/user/queue/reply', onMessageReceived)
+	subscription = stompClient.subscribe('/user/queue/reply', onMessageReceived, {ack:'client'});
+	
+//	var subscription = client.subscribe("/queue/test",
+//    function(message) {
+//      // do something with the message
+//      ...
+//      // and acknowledge it
+//      message.ack();
+//    },
+//    {ack: 'client'}
+//  ); 
 
 	// Tell your username to the server
 	stompClient.send("/app/chat.register", {}, JSON.stringify({
 		sender : username,
 		type : 'JOIN'
-	}))
+	}));
 
 	connectingElement.classList.add('hidden');
 
@@ -68,6 +78,7 @@ function send(event) {
 	var messageContent = messageInput.value.trim();
 
 	if (messageContent && stompClient) {
+		//Esto lo enviaría AMMA.
 		var chatMessage = {
 			sender : username,
 			content : messageInput.value,
@@ -75,6 +86,7 @@ function send(event) {
 			receiver : receiver
 		};
 
+		//Replicar esta misma línea dentro de un endpoint HTTP.
 		stompClient.send("/app/saludar", {}, JSON.stringify(chatMessage));
 		messageInput.value = '';
 	}
@@ -84,7 +96,11 @@ function send(event) {
 function onMessageReceived(payload) {
 	console.log('Mensaje recibido!: ' + payload.body);
 	var message = JSON.parse(payload.body);
-
+	
+	
+	stompClient.ack("WFWFWG", subscription, {"user":username});
+	
+	
 	var messageElement = document.createElement('li');
 
 	if (message.type === 'JOIN') {

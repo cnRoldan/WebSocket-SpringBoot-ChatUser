@@ -30,6 +30,7 @@ public class ChatController {
 	@MessageMapping("/saludar")
 	public void sendSpecific(Principal principal , @Payload ChatMessage msg, @Header("simpSessionId") String sessionId)
 			throws Exception {
+		//Utilizar esta linea para enviar desde un RESTCONTROLLER.
 		simpMessagingTemplate.convertAndSendToUser(msg.getReceiver(), "/queue/reply",
 				msg);
 	}

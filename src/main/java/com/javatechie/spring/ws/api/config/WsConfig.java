@@ -10,7 +10,7 @@ import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.support.ChannelInterceptorAdapter;
+import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -41,14 +41,30 @@ public class WsConfig implements WebSocketMessageBrokerConfigurer {
 		registry.setApplicationDestinationPrefixes("/app");
 		registry.setUserDestinationPrefix("/user");
 	}
+	
+	
 
 	@Override
 	public void configureClientInboundChannel(ChannelRegistration registration) {
-		registration.setInterceptors(new ChannelInterceptorAdapter() {
+		
+		registration.interceptors(new ChannelInterceptor() {
+			
+			
+			
+			@Override
+			public boolean preReceive(MessageChannel channel) {
+				// TODO Auto-generated method stub
+				return ChannelInterceptor.super.preReceive(channel);
+			}
+
+			@Override
+			public Message<?> postReceive(Message<?> message, MessageChannel channel) {
+				// TODO Auto-generated method stub
+				return ChannelInterceptor.super.postReceive(message, channel);
+			}
 
 			@Override
 			public Message<?> preSend(Message<?> message, MessageChannel channel) {
-
 				StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 				if (StompCommand.CONNECT.equals(accessor.getCommand())) {
 					String user = accessor.getFirstNativeHeader("user");
@@ -64,5 +80,6 @@ public class WsConfig implements WebSocketMessageBrokerConfigurer {
 				return message;
 			}
 		});
+		
 	}
 }
