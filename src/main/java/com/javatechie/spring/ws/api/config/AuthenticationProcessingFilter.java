@@ -16,24 +16,39 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
-import io.jsonwebtoken.Jwts;
-
-
 public class AuthenticationProcessingFilter extends AbstractPreAuthenticatedProcessingFilter {
 
-	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+//	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+//
+//
+//		HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
+////		String token = httpRequest.getHeader("Authorization");
+////		
+////		String user = Jwts.parser().setSigningKey("AdminAMMA")
+////				.parseClaimsJws(token.replace("Bearer", "")).getBody().getSubject();
+////
+////		String mT = (String) Jwts.parser().setSigningKey("AdminAMMA")
+////				.parseClaimsJws(token.replace("Bearer", "")).getBody().get("mT");
+////		if(user != null && mT != null) {
+//			List<GrantedAuthority> authorities = new ArrayList<>();
+//			authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+//			UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, user, authorities);
+//			SecurityContextHolder.getContext().setAuthentication(auth);
+////		}
+//
+//		filterChain.doFilter(servletRequest, servletResponse);
+//	}
+
+	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+			throws IOException, ServletException {
 
 
 		HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
-		String token = httpRequest.getHeader("Authorization");
-		
-		String user = Jwts.parser().setSigningKey("AdminAMMA")
-				.parseClaimsJws(token.replace("Bearer", "")).getBody().getSubject();
 
-		String mT = (String) Jwts.parser().setSigningKey("AdminAMMA")
-				.parseClaimsJws(token.replace("Bearer", "")).getBody().get("mT");
+		String user = httpRequest.getHeader("user");
+		String password = httpRequest.getHeader("password");
 
-		if(user != null && mT != null) {
+		if (user != null && password != null) {
 			List<GrantedAuthority> authorities = new ArrayList<>();
 			authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 			UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, user, authorities);
